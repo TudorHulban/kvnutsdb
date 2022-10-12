@@ -20,10 +20,12 @@ type KVStore struct {
 }
 
 const _folderDB = "./nutsdb"
+const _segmentSizeTesting = 4 * 1024 * 1024 // 4 MB
 
-// NewBStoreDiskWSyncWrites returns a type containing a store that satisfies store interface.
+// NewStore returns a type containing a store that satisfies store interface.
+// With test segment size.
 func NewStore(l *log.Logger) (*KVStore, error) {
-	db, errOpen := nutsdb.Open(nutsdb.DefaultOptions, nutsdb.WithDir(_folderDB))
+	db, errOpen := nutsdb.Open(nutsdb.DefaultOptions, nutsdb.WithDir(_folderDB), nutsdb.WithSegmentSize(_segmentSizeTesting))
 	if errOpen != nil {
 		return nil, fmt.Errorf("could not create database in folder: %s, %w", _folderDB, errOpen)
 	}
