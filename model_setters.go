@@ -8,3 +8,13 @@ func (s *KVStore) Set(bucket string, key, value []byte) error {
 		return txn.Put(bucket, key, value, 0)
 	})
 }
+
+// SetAny sets or updates key in store.
+func (s *KVStore) SetAny(bucket string, key []byte, value any) error {
+	encodedValue, errEncode := Encode(value)
+	if errEncode != nil {
+		return errEncode
+	}
+
+	return s.Set(bucket, key, encodedValue)
+}

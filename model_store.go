@@ -2,7 +2,6 @@ package kvnuts
 
 import (
 	"fmt"
-	"log"
 
 	"github.com/xujiajun/nutsdb"
 )
@@ -15,24 +14,35 @@ type KV struct {
 
 // BStore Concentrates information defining a KV store.
 type KVStore struct {
-	logger *log.Logger // logger needed only for package logging
-	Store  *nutsdb.DB
+	Store *nutsdb.DB
 }
 
 const _folderDB = "./nutsdb"
-const _segmentSizeTesting = 4 * 1024 * 1024 // 4 MB
+const _segmentSizeTests = 4 * 1024 * 1024 // 4 MB
 
-// NewStore returns a type containing a store that satisfies store interface.
+// NewStoreInMemory returns a type containing a store that satisfies store interface.
 // With test segment size.
-func NewStore(l *log.Logger) (*KVStore, error) {
-	db, errOpen := nutsdb.Open(nutsdb.DefaultOptions, nutsdb.WithDir(_folderDB), nutsdb.WithSegmentSize(_segmentSizeTesting))
+func NewStoreInMemory(mbSegmentSize uint) (*KVStore, error) {
+	db, errOpen := nutsdb.Open(nutsdb.DefaultOptions, nutsdb.WithDir(_folderDB), nutsdb.WithSegmentSize(int64(mbSegmentSize)))
 	if errOpen != nil {
 		return nil, fmt.Errorf("could not create database in folder: %s, %w", _folderDB, errOpen)
 	}
 
 	return &KVStore{
-		logger: l,
-		Store:  db,
+		Store: db,
+	}, nil
+}
+
+// NewStore returns a type containing a store that satisfies store interface.
+// With test segment size.
+func NewStore(mbSegmentSize uint) (*KVStore, error) {
+	db, errOpen := nutsdb.Open(nutsdb.DefaultOptions, nutsdb.WithDir(_folderDB), nutsdb.WithEntryIdxMode(nutsdb.HintKeyAndRAMIdxMode), nutsdb.WithSegmentSize(int64(mbSegmentSize)))
+	if errOpen != nil {
+		return nil, fmt.Errorf("could not create database in folder: %s, %w", _folderDB, errOpen)
+	}
+
+	return &KVStore{
+		Store: db,
 	}, nil
 }
 
